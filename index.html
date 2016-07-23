@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+  <html>
+    <head>
+      <!--Import Google Icon Font-->
+      <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+      <!--Import materialize.css-->
+      <link type="text/css" rel="stylesheet" href="css/materialize.css"  media="screen,projection"/>
+        <link type="text/css" rel="stylesheet" href="css/icon.css"  media="screen,projection"/>
+ <link type="text/css" rel="stylesheet" href="css/custom.css"  media="screen,projection"/>
+<link type="text/css" rel="stylesheet" href="css/sweetalert.css" />
+      <!--Let browser know website is optimized for mobile-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    </head>
+
+    <body class="teal lighten-4">
+      <!--Import jQuery before materialize.js-->
+      <script type="text/javascript" src="js/jquery.js"></script>
+      <script type="text/javascript" src="js/materialize.js"></script>
+      <script type="text/javascript" src="js/myscript.js"></script>
+       <script type="text/javascript" src="js/sweetalert.min.js"></script>
+      
+      <script src="/socket.io/socket.io.js"></script>
+      <script type="text/javascript">
+var person = prompt("Please enter your name", "");
+ audio = new Audio('/msg.mp3');
+  var socket = io();
+
+  </script>
+   
+<nav>
+    <div class="nav-wrapper indigo darken-3">
+      <div  class="brand-logo" style="left: 76px;">
+<span id="perName" style="font-size: 17px !important; text-align: left;font-style:italic;"></span>
+      </div>
+     
+    </div>
+  </nav>
+<br>
+<div id="fixArea" style="overflow-y: hidden; overflow-y: scroll;height: 27em;">
+<div id="chatArea" style=" position: relative;">
+
+
+</div>
+   </div>
+        <div class="fixed-action-btn col" style="bottom: -15px;width: 100%;right: 0px; ">
+         <div class="row s12 l12 m12 card-panel blue lighten-5">
+           <form action="" class="col s12"> 
+             <div class="input-field col s9 l9 m9">
+             <input id="textSnd" autocomplete="off" type="text" class="">
+             </div>
+          <div class="input-field col s2 l2 m2">
+             <button  class="btn waves-effect waves-light indigo darken-3"  >Send
+    
+  </button>
+             </div>
+             </form>
+         </div>
+        </div>
+
+
+    <script type="text/javascript">
+     $('#perName').hide();
+  
+  $('#textSnd').keydown(function()
+  {
+ socket.emit('personTyping', person);
+ $('#perName').hide();
+  })
+
+  socket.on('personTyping', function(perName){
+$('#perName').text(perName + " is typing");
+$('#perName').show();
+})
+
+
+   $('#textSnd').keyup(function()
+  {
+ socket.emit('personTypingStop', person);
+  })
+
+   socket.on('personTypingStop', function(perName){
+     setTimeout(function(){
+      $('#perName').hide();
+        
+    },300);
+
+})
+
+socket.on('connect',function()
+{
+ socket.emit('userJoined', person);
+})
+
+
+ $('form').submit(
+    function(e)
+  {
+  /*  e.preventDefault();*/
+     socket.emit('chat message', $('#textSnd').val(),person);
+    $('#textSnd').val('');
+
+    return false;
+  })
+
+socket.on('chat message', function(msg,user)
+  {
+
+     var sendText = user+": "+msg;
+     var insertArea=$("#chatArea");
+     if(user == person)
+     {
+      var messageHtmlRightTemplate="<div class='row s12' style='width: 100%'><div class='col s6 offset-s5  grey lighten-5' >" 
+    +"<div class='flow-text' style='word-break: break-all;'>"+sendText+"</div></div></div>";
+      insertArea.append(messageHtmlRightTemplate);
+
+     }
+     else
+     {
+
+       var messageHtmlLeftTemplate="<div class='row s12' style='width: 100%'><div class='col s6 offset-s1  grey lighten-5' >" 
+    +"<span class='flow-text' style='word-break: break-all;'>"+sendText+"</span></div></div>";
+      insertArea.append(messageHtmlLeftTemplate);
+       audio.play()
+     }
+    
+    var target=document.getElementById("fixArea")
+    $('#fixArea').animate({
+        scrollTop: target.scrollHeight
+    }, 100);
+  })
+   
+socket.on('userJnd',function(username)
+{
+ var insertArea=$("#chatArea");
+ var userJn=username + " Joined" ; 
+ var userJoinedTemplate="<div class='row s12' style='width: 100%'><div class='col s6 offset-s3   blue darken-1' >" 
+    +"<div class='flow-text' style='word-break: break-all;font-size: 15px;font-style: italic;text-align: center;color: white;'>"+userJn+"</div></div></div>";
+      
+      insertArea.append(userJoinedTemplate);
+
+});
+
+    
+
+  
+ 
+    </script>    
+    </body>
+  </html>
+        
